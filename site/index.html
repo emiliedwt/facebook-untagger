@@ -3,8 +3,11 @@
 	<title>Facebook Untagger, supprimer tous les tags sur vos photos Facebook</title>
 
 	<script type="text/javascript" src="http://code.jquery.com/jquery.min.js"></script>
+	<script type="text/javascript" src="js/mustache.js"></script>
 	<script type="text/javascript" src="js/FacebookManager.js"></script>
 	<script type="text/javascript" src="js/facebook-untagger.js"></script>
+
+	<link rel="stylesheet" href="css/main.css">
 </head>
 <body>
 	<header>
@@ -12,12 +15,29 @@
 		<p>Supprimer facilement tous les tags sur vos photos Facebook</p>
 	</header>
 
-	<div id="content">
-		<a id="fbConnectButton" href="#">log with Facebook</a>
+	<div id="container">
 	</div>
 
 	<footer><a href="https://github.com/emiliedwt/facebook-untagger">GitHub </a></footer>
 
 	<div id="fb-root"></div>
+
+	<!-- template list -->
+	<div id="template-list">
+		<div id="tpl-loading">
+			loading...
+		</div>
+		<div id="tpl-connect">
+			<a id="fbConnectButton" href="#">log with Facebook</a>
+		</div>
+		<div id="tpl-photosList">
+			<p>Vous avez {{photosTagInCount}} photos tagg&eacute;es.</p>
+			<a id="untagButton" href="#">Supprimer tous les tags</a>
+		</div>
+		<div id="tpl-error">
+			<p>Une erreur est survenue. Veuillez r&eacute;essayer de vous connecter.</p>
+			<a id="fbConnectButton" href="#">log with Facebook</a>
+		</div>
+	</div>
 </body>
 </html>

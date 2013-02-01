@@ -41,6 +41,9 @@
 			this._fetchUserInfos_completeHandler = $.proxy( this._fetchUserInfos_completeHandler, this );
 			this.fetchUserPhotosTagIn_successHandler = $.proxy( this.fetchUserPhotosTagIn_successHandler, this );
 			this.fetchUserPhotosTagIn_errorHandler = $.proxy( this.fetchUserPhotosTagIn_errorHandler, this );
+			this.deleteTag_successHandler = $.proxy( this.deleteTag_successHandler, this );
+			this.deleteTag_successHandler = $.proxy( this.deleteTag_successHandler, this );
+			this.deleteTag_errorHandler = $.proxy( this.deleteTag_errorHandler, this );
 
 			// Lance l'initialisation après chargement du sdk
 			window.fbAsyncInit = this._sdk_successHandler;
@@ -66,6 +69,7 @@
 			console.log( 'FacebookManager::_sdk_successHandler()', this._initOptions );
 			// init the FB JS SDK
 			FB.init( this._initOptions );
+			$( this ).trigger( 'ready' );
 		},
 
 		/**
@@ -189,8 +193,9 @@
 		fetchUserPhotosTagIn: function()
 		{
 			$.ajax({
-				type: 'GET', // Le type de ma requete
-				url: 'https://graph.facebook.com/' + this._user.id + '/photos?method=GET&format=json&access_token=' + this._authResponse.accessToken, // L'url vers laquelle la requete sera envoyee
+				type: 'GET',
+				dataType: 'json',
+				url: 'https://graph.facebook.com/' + this._user.id + '/photos?access_token=' + this._authResponse.accessToken, // L'url vers laquelle la requete sera envoyee
 				data: {},
 				success: this.fetchUserPhotosTagIn_successHandler,
 				error: this.fetchUserPhotosTagIn_errorHandler
@@ -199,8 +204,9 @@
 
 		fetchUserPhotosTagIn_successHandler: function( data, textStatus, jqXHR )
 		{
-			console.log( 'FacebookManager::fetchUserPhotosTagIn_successHandler(', $.parseJSON( data ), ')', this );
-			this._user.photosTagIn = $.parseJSON( data );
+			console.log( 'FacebookManager::fetchUserPhotosTagIn_successHandler(', data, ')', this );
+			this._user.photosTagIn = data;
+			this._user.photosTagInCount = data.data.length;
 			var options = {
 				changes: [ 'photosTagIn' ],
 				user: this._user
@@ -212,6 +218,42 @@
 		{
 			// console.log( 'FacebookManager::fetchUserPhotosTagIn_errorHandler(', $.parseJSON(jqXHR.responseText).error, ')', this );
 			$( this._user ).trigger( 'error', $.parseJSON(jqXHR.responseText).error );
+		},
+
+		deleteAllTags: function()
+		{
+			console.log( 'FacebookManager::deleteAllTags()' );
+			var photoList = this._user.photosTagIn.data;
+			for( var i = 0; i < photoList.length; i++ )
+			{
+				console.log( 'FacebookManager::deleteAllTags() photo', photoList[ i ].id );
+				this.deleteTag( photoList[ i ].id );
+			}
+		},
+
+		deleteTag: function( photoId )
+		{
+			console.log( 'FacebookManager::deleteTags(', photoId, ')' );
+			$.ajax({
+				//type: 'GET',
+				//dataType: 'json',
+				url: 'https://graph.facebook.com/' + photoId + '/tags/' + this._user.id + '?method=DELETE&access_token=' + this._authResponse.accessToken, // L'url vers laquelle la requete sera envoyee
+				data: {},
+				success: this.deleteTag_successHandler,
+				error: this.deleteTag_errorHandler
+			});
+		},
+
+		deleteTag_successHandler: function( data, textStatus, jqXHR )
+		{
+			console.log( 'FacebookManager::deleteTag_successHandler(', arguments, ')' );
+			// this._user.photosTagIn
+		},
+
+		deleteTag_errorHandler: function( jqXHR, textStatus, errorThrown )
+		{
+			console.log( 'FacebookManager::deleteTag_errorHandler()' );
+			$( this._user ).trigger( 'error' );
 		},
 
 		/**
